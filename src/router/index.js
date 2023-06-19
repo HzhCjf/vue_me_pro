@@ -5,6 +5,9 @@ import Login from '@/pages/Login'
 import Register from '@/pages/Register'
 import Search from '@/pages/Search'
 import NotFound from '@/pages/404'
+// 进度条的第三方包
+import NProgress  from "nprogress";
+import "nprogress/nprogress.css"
 Vue.use(VueRouter)
 
 // 重写router的push和replace方法解决重复导航的bug
@@ -60,6 +63,20 @@ const router = new VueRouter({
             }
         },
     ]
+})
+
+
+// 全局前置路由
+router.beforeEach((to,from,next)=>{
+    // 全局跳转路由放行之前进度条开始
+    NProgress.start()
+    next()
+})
+
+// 全局后置钩子
+router.afterEach(()=>{
+    // 放行之后进度条结束
+    NProgress.done()
 })
 
 export default router
