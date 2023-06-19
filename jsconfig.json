@@ -7,7 +7,16 @@
     "paths": {
       "@/*": [
         "src/*"
-      ]
+      ],
+      "@comp*": [
+        "src/components/*"
+      ],
+      "@api*": [
+        "src/api/"
+      ],
+      "@/pages": [
+        "src/pages/"
+      ],
     },
     "lib": [
       "esnext",

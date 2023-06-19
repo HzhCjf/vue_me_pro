@@ -15,6 +15,8 @@ module.exports = {
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     // 关闭eslint里面的组件名需要两个单词的规则
     "vue/multi-word-component-names": 0,
+    // 关闭在template里必须写的规则
+    'vue/valid-template-root':0
   },
   // 关闭项目的eslint检测
   // lintOnSave:false
