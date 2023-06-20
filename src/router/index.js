@@ -1,13 +1,14 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Home from '@/pages/Home'
-import Login from '@/pages/Login'
-import Register from '@/pages/Register'
-import Search from '@/pages/Search'
-import NotFound from '@/pages/404'
 // 进度条的第三方包
 import NProgress  from "nprogress";
 import "nprogress/nprogress.css"
+const Home = ()=> import('@/pages/Home')
+const Login = ()=> import('@/pages/Login')
+const Register = ()=> import('@/pages/Register')
+const Search = ()=> import('@/pages/Search')
+const NotFound = ()=> import('@/pages/404')
+
 Vue.use(VueRouter)
 
 // 重写router的push和replace方法解决重复导航的bug

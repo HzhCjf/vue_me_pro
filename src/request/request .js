@@ -1,6 +1,4 @@
 import axios from "axios";
-console.log('process.env.VUE_APP_API1',process.env.VUE_APP_API1);
-
 const request  = axios.create({
     // 目标地址
     baseURL:process.env.VUE_APP_API1,
