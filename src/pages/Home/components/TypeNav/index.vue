@@ -14,7 +14,12 @@
         <a href="###">秒杀</a>
       </nav>
       <div class="sort">
-        <div class="all-sort-list2" @mouseenter="isStor = true" @mouseleave="isStor = false">
+        <div
+          class="all-sort-list2"
+          @mouseenter="isStor = true"
+          @mouseleave="isStor = false"
+          @click="toSearch"
+        >
           <div
             class="item"
             v-for="(Category1, index) in Category1List"
@@ -24,7 +29,7 @@
             :class="{ active: isActive === index }"
           >
             <h3>
-              <a href="">{{ Category1.name }}</a>
+              <a :data-category1id="Category1.id" :data-categoryname="Category1.name">{{ Category1.name }}</a>
             </h3>
             <div class="item-list clearfix">
               <div class="subitem">
@@ -34,14 +39,14 @@
                   :key="Category2.id"
                 >
                   <dt>
-                    <a href="">{{ Category2.name }}</a>
+                    <a :data-category2id="Category2.id" :data-categoryname="Category2.name" >{{ Category2.name }}</a>
                   </dt>
                   <dd>
                     <em
                       v-for="Category3 in Category2.children"
                       :key="Category3.id"
                     >
-                      <a href="">{{ Category3.name }}</a>
+                      <a :data-category3id="Category3.id" :data-categoryname="Category3.name">{{ Category3.name }}</a>
                     </em>
                   </dd>
                 </dl>
@@ -91,13 +96,13 @@ export default {
       trailing: true,
     });
   },
-  
+
   methods: {
     // 1级列表的请求
     async getCategory1List() {
       // 异步请求
       const result = await reqCategory1List();
-      // 将数据放入变量,然后去.item中遍历
+      // 将数据放入变量,然后去.item中遍历渲染
       this.Category1List = result;
       // console.log(this.Category1List);
     },
@@ -105,7 +110,7 @@ export default {
     // 根据1级列表的id来请求2级列表
     async mouseEneterReqCate2(Category1, index) {
       // 看门狗,如果鼠标没移出这个列表区域,就直接返回
-      if(!this.isStor) return
+      if (!this.isStor) return;
 
       // 将下标的值给到isActive,等会判断的时候,如果下标和isActive相等就把类名active给它
       this.isActive = index;
@@ -132,6 +137,22 @@ export default {
     },
     // 定义为一个占位函数,把1级列表的节流赋给了它
     mouseEneterReqCate2Throttle() {},
+    // 点击列表跳转到搜索页并携带参数
+    toSearch(e) {
+      //如果没有categoryname属性值,说明点击的并不是分类列表
+      if(!e.target.dataset.categoryname) return
+
+      const {category1id,category2id,category3id,categoryname} = e.target.dataset
+      this.$router.push({
+        name:'Search',
+        query:{
+          category1Id:category1id,
+          category2Id:category2id,
+          category3Id:category3id,
+          categoryName:categoryname
+        }
+      });
+    },
   },
 };
 </script>
