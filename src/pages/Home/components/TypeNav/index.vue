@@ -14,22 +14,35 @@
         <a href="###">秒杀</a>
       </nav>
       <div class="sort">
-        <div class="all-sort-list2">
-          <div class="item" v-for="Category1,index in Category1List" :key="Category1.id" @mouseenter="mouseEneterReqCate2(Category1,index)" @mouseleave="isActive = -1" :class="{active:isActive===index}">
+        <div class="all-sort-list2" @mouseenter="isStor = true" @mouseleave="isStor = false">
+          <div
+            class="item"
+            v-for="(Category1, index) in Category1List"
+            :key="Category1.id"
+            @mouseenter="mouseEneterReqCate2Throttle(Category1, index)"
+            @mouseleave="isActive = -1"
+            :class="{ active: isActive === index }"
+          >
             <h3>
               <a href="">{{ Category1.name }}</a>
             </h3>
             <div class="item-list clearfix">
               <div class="subitem">
-                <dl class="fore" v-for="Category2 in Category1.children" :key="Category2.id">
+                <dl
+                  class="fore"
+                  v-for="Category2 in Category1.children"
+                  :key="Category2.id"
+                >
                   <dt>
                     <a href="">{{ Category2.name }}</a>
                   </dt>
                   <dd>
-                    <em v-for="Category3 in Category2.children" :key="Category3.id">
+                    <em
+                      v-for="Category3 in Category2.children"
+                      :key="Category3.id"
+                    >
                       <a href="">{{ Category3.name }}</a>
                     </em>
-                   
                   </dd>
                 </dl>
               </div>
@@ -45,56 +58,80 @@
 </template>
 
 <script>
-import { reqCategory1List , reqCategory2List,reqCategory3List } from "@/api/home";
+import {
+  reqCategory1List,
+  reqCategory2List,
+  reqCategory3List,
+} from "@/api/home";
+import { throttle } from "lodash";
 export default {
   name: "TypeNav",
-  data(){
-    return{
-      Category1List :[],
-      isActive : -1,
-      Category2List:[],
-    }
+  data() {
+    return {
+      // 1级列表数据的容器
+      Category1List: [],
+      // 是否添加avtive类名的
+      isActive: -1,
+      // 2级列表数据的容器
+      Category2List: [],
+      // 判断是否移出了列表
+      isStor: false,
+    };
   },
   // 初始化1级列表
   mounted() {
-    this.getCategory1List()
+    // 初始请求1级列表
+    this.getCategory1List();
+
+    // 使用throttle来获得一个节流函数,用一个函数来进行占位
+    this.mouseEneterReqCate2Throttle = throttle(this.mouseEneterReqCate2, 300, {
+      //leading:让事件函数在节流开始前执行
+      leading: true,
+      //trailing配置项让函数在节流结束后执行最后一次
+      trailing: true,
+    });
   },
+  
   methods: {
     // 1级列表的请求
     async getCategory1List() {
       // 异步请求
       const result = await reqCategory1List();
       // 将数据放入变量,然后去.item中遍历
-      this.Category1List = result
+      this.Category1List = result;
       // console.log(this.Category1List);
-      
     },
 
     // 根据1级列表的id来请求2级列表
-    async mouseEneterReqCate2(Category1,index){
+    async mouseEneterReqCate2(Category1, index) {
+      // 看门狗,如果鼠标没移出这个列表区域,就直接返回
+      if(!this.isStor) return
+
       // 将下标的值给到isActive,等会判断的时候,如果下标和isActive相等就把类名active给它
-      this.isActive = index
+      this.isActive = index;
 
       // 如果这个1级列表对应的2级列表已经请求过了,不必再请求一遍,提高性能,减少渲染和请求的时间,因为2级列表放在1级列表数据里的children里面
-      if(Category1.children) return
+      if (Category1.children) return;
       // 请求2级列表,并加上1级列表的id
-      const result = await reqCategory2List(Category1.id)
-      
+      const result = await reqCategory2List(Category1.id);
+
       // 因为3级列表没有在2级列表里面被一起请求过去,所以要把请求的3级列表放入2级列表里面,循环2级列表的数据,
-      result.forEach(async item =>{
+      result.forEach(async (item) => {
         // 方法2:也是把3级列表的数据方法2级列表每一项数据的children里面,需要在请求之前,先创建一个空的数组children
         // item.children = []
         // 请求3级列表
-        const result = await reqCategory3List(item.id)
+        const result = await reqCategory3List(item.id);
         //方法2: 把3级列表的数据放入2级列表数据的children里面
         // item.children = result
         //方法1:请求完数据之后,给2级列表数据的每一项都创建一个children属性,并且放入3级列表数据
-        this.$set(item,'children',result)
-      })
+        this.$set(item, "children", result);
+      });
 
       // 在访问1级列表其中的数据的时候,给数据创建一个children属性,用来存放2级列表
-      this.$set(Category1,'children',result)
-    }
+      this.$set(Category1, "children", result);
+    },
+    // 定义为一个占位函数,把1级列表的节流赋给了它
+    mouseEneterReqCate2Throttle() {},
   },
 };
 </script>
@@ -142,11 +179,10 @@ export default {
 
       .all-sort-list2 {
         .item {
-          &.active{
-            h3{
+          &.active {
+            h3 {
               background: #65cdfd;
             }
-           
           }
           h3 {
             line-height: 30px;

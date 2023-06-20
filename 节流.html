@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #box{
+            width: 100px;
+            height: 100px;
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+    <div id="box">
+        
+    </div>
+
+    <script>
+        let obox = document.getElementById('box')
+
+        function center(e){
+            console.log('核心代码',this,'e',e);
+            
+        }
+
+        obox.onmousemove = throttle(center,500)
+        
+        function throttle(fn,time){
+            let lastTime = 0
+            return function(e){
+                let nowTime = Date.now()  
+                if(nowTime - lastTime <= time) return;
+                lastTime = nowTime
+                fn.call(this,e)
+                
+            }
+        }
+    </script>
+</body>
+</html>
