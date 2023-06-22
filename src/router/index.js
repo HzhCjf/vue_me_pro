@@ -51,7 +51,7 @@ const router = new VueRouter({
             }
         },
         {
-            path:'/search',
+            path:'/search/:keyword?',
             component:Search,
             name:'Search'
         },

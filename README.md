@@ -102,3 +102,131 @@ vue.config.js文件里面
 ### 路由切换是进度条的配置
 - 下载nprogress包
 - 在路由配置中引入NProgress,和"nprogress/nprogress.css",然后设置全局前置守卫和全局后置钩子,在前置里面进度条开始,后置里面结束
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### 组件点击搜索跳转search
+- 为搜索按钮绑定点击事件
+- 在methods里面为点击事件创建一个方法,用来跳转search,需要把这个搜索框里面的数据也要传过去,可以在数据里面创建一个keyword来和输入框里面的数据进行绑定,然后在跳转到search的方法里面进行传参,可以用params来进行传参,需要记住的是,参数不能为空字符串,需要在search路由那边也要进行参数占位,因为这个参数是可选的
+
+
+### 搜索的时候合并params和query参数
+- 在点击搜索的时候要获取当前路由的query参数,然后把参数给到跳转路由
+- 在点击分类列表跳转到search的时候要获取可能存在的parmas参数,然后把参数也要给到跳转路由
+
+
+### 切换TypeNav为公共组件
+- 因为不止在首页要用到TypeNav组件,search里面也要用到,所以需要把TypeNav变成公共组件
+- 直接把TypeNav组件移动到components文件夹里面
+- 然后用一个div把h2和分类列表全都包裹住
+- 因为在search里面的分类是需要鼠标移入到里面才能显示,所以我们需要给这个div一个鼠标移入和移出事件,用一个变量来切换,给分类列表一个v-show,并给他一个计算属性,用计算属性来确认它是否隐藏
+- 在计算属性里面,先判断当前路由是否在首页home里面,如果在就永久显示,不在就把鼠标事件的变量返回,
+- 做好了TypeNav组件里面的内容,还需要把组件注册为全局组件,然后给search里面也加上
+
+
+### mock拦截请求的配置
+- 下载mockjs
+- 把request文件复制一份,然后名字后面加上Mock,在request文件夹里面的index里面引入并暴露
+- 在src里面新建文件夹mock,然后再建data文件夹,在里面新建文件banner.json,里面就是轮播图的数据,在mock文件夹里面创建index,引入mock,引入数据,开始拦截请求,第一个参数是拦截的地址,随便写,第二个是发送的什么请求,第三个是模仿后端返回的数据的对象
+    ```js
+        {
+            code: 200,
+            data: banner,
+            message: "成功",
+            ok: true,
+        }
+    ```
+- 在api里面请求List组件中的轮播图数据,地址就为mock里面的地址
+- 然后在List组件里面开始初始化发送请求
+- 注意:在分类列表跳转到search里面的时候,一跳转就要给显示的分类列表变成隐藏
+
+
+### List中banner的获取及渲染&&&解决mock数据后数据内部图片问题
+- 在data中创建一个数据,用来存放轮播图的数据,
+- 在methods中请求轮播图数据,然后把数据放入到data数据中,在初始化里面进行请求,
+- 用数据给轮播图进行遍历,把数据全部放入
+- 在这时,图片是找不到的,因为我们这是假的数据,需要把图片放在public里面的images里面
+
+
+### swiper的引入及使用
+- 下载swiper@5
+- 这是专门用来做轮播图的包
+- 给List组件进行引入swiper,和`import "swiper/css/swiper.min.css"`
+- 在初始化的时候直接用
+    ```js
+        <!-- .swiper-container是用轮播图的位置 -->
+        new Swiper(".swiper-container", {
+        loop: true, // 循环模式选项
+
+        // 如果需要分页器
+        pagination: {
+            el: ".swiper-pagination",
+        },
+
+        // 如果需要前进后退按钮
+        navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+        },
+        });
+    ```
+
+
+### $nextTick的作用和使用
+- 这个时候轮播图会出现一个问题,就是划不动,因为在swiper运行之后,轮播的数据还没到或者是DOM还没渲染完成,所以导致这个问题
+- 我们需要使用$nextTick来解决,$nextTick:将nextTick回调函数，延迟到数据更新后，并且 DOM 更新之后执行。在修改数据之后立即使用它，然后等待 DOM 更新才会执行回调函数
+
+
+### floor组件的mock数据获取及数据渲染
+- 在mock里面的data里面给floor建立一个json数据文件,可以把`import "swiper/css/swiper.min.css"`在别的位置删除了,直接在入口文件里面引入
+- 然后在index里面进拦截,返回数据,在api的home,书写请求
+- 因为floor组件不止有一个,是多个,需要在Home里面进行发起请求,还是用一个数据来保存请求到的数据,在初始化里面请求楼层数据,在methods里面书写请求的方法
+- 然后把数据给到Floor组件里面进行v-for遍历,把数据传给组件里面
+- 在Floor组件里面接收数据,把数据放入模板中
+
+
+
+### 封装swiper公共组件前 让两个swiper的组件保持一致
+- 可以看到的是List组件和Floor组件都使用到了轮播图,所以我们可以把swiper进行封装组件,在这之前需要把两个组件的swiper变成一致
+- 可以在components文件夹里面先创建Swiper组件,然后把模板先放入进行,还有传入的参数list,因为list就是我们接收到的轮播图的数据名
+- 首先,在Floor组件中使用swiper的时候,因为我们需要封装组件,就不能用什么类名之类的了,因为可能组件会复用,多个的时候造成冲突,可以使用ref来绑定这个元素,
+
+- 然后开始在watch里面监听这个数据,List的数据并不是直接里的毕竟,floor的数据是直接有的,所以我们需要在监听的时候先立即监听,然后在handler函数里面进行判断,如果数据的长度为0就直接返回,不进行下一步的操作
+- 在进行swiper的时候都需要用$nextTick进行包裹,以防数据还没来就调用了swiper
+
+
+
+### 封装swiper公共组件
+- 把里面的watch复制到Swiper组件里面,将监听对象改为list
+- 把Swiper组件注册为全局组件
+- 在List组件里面把组件的轮播图模板都可以用Swiper来代替,要把轮播图的数据用list传给Swiper组件,Floor也是一样

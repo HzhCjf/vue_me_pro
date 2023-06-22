@@ -2,7 +2,69 @@
   <!-- 商品分类导航 -->
   <div class="type-nav">
     <div class="container">
-      <h2 class="all">全部商品分类</h2>
+      <div  @mouseenter="isCategoryEnter = true" @mouseleave="isCategoryEnter = false">
+        <h2 class="all">全部商品分类</h2>
+        <div class="sort" v-show="CategoryIsShow">
+          <!-- 鼠标移入就触发样式,移出去除,为子元素做点击事件代理 -->
+          <div
+            class="all-sort-list2"
+            @mouseenter="isStor = true"
+            @mouseleave="isStor = false"
+            @click="toSearch"
+          >
+            <!-- 1级列表遍历 -->
+            <div
+              class="item"
+              v-for="(Category1, index) in Category1List"
+              :key="Category1.id"
+              @mouseenter="mouseEneterReqCate2Throttle(Category1, index)"
+              @mouseleave="isActive = -1"
+              :class="{ active: isActive === index }"
+            >
+              <h3>
+                <a
+                  :data-category1id="Category1.id"
+                  :data-categoryname="Category1.name"
+                  >{{ Category1.name }}</a
+                >
+              </h3>
+              <div class="item-list clearfix">
+                <div class="subitem">
+                  <dl
+                    class="fore"
+                    v-for="Category2 in Category1.children"
+                    :key="Category2.id"
+                  >
+                    <dt>
+                      <a
+                        :data-category2id="Category2.id"
+                        :data-categoryname="Category2.name"
+                        >{{ Category2.name }}</a
+                      >
+                    </dt>
+                    <dd>
+                      <em
+                        v-for="Category3 in Category2.children"
+                        :key="Category3.id"
+                      >
+                        <a
+                          :data-category3id="Category3.id"
+                          :data-categoryname="Category3.name"
+                          >{{ Category3.name }}</a
+                        >
+                      </em>
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+            <h3>
+              <a href="">箱包</a>
+            </h3>
+          </div>
+        </div>
+      </div>
+
       <nav class="nav">
         <a href="###">服装城</a>
         <a href="###">美妆馆</a>
@@ -13,51 +75,6 @@
         <a href="###">有趣</a>
         <a href="###">秒杀</a>
       </nav>
-      <div class="sort">
-        <div
-          class="all-sort-list2"
-          @mouseenter="isStor = true"
-          @mouseleave="isStor = false"
-          @click="toSearch"
-        >
-          <div
-            class="item"
-            v-for="(Category1, index) in Category1List"
-            :key="Category1.id"
-            @mouseenter="mouseEneterReqCate2Throttle(Category1, index)"
-            @mouseleave="isActive = -1"
-            :class="{ active: isActive === index }"
-          >
-            <h3>
-              <a :data-category1id="Category1.id" :data-categoryname="Category1.name">{{ Category1.name }}</a>
-            </h3>
-            <div class="item-list clearfix">
-              <div class="subitem">
-                <dl
-                  class="fore"
-                  v-for="Category2 in Category1.children"
-                  :key="Category2.id"
-                >
-                  <dt>
-                    <a :data-category2id="Category2.id" :data-categoryname="Category2.name" >{{ Category2.name }}</a>
-                  </dt>
-                  <dd>
-                    <em
-                      v-for="Category3 in Category2.children"
-                      :key="Category3.id"
-                    >
-                      <a :data-category3id="Category3.id" :data-categoryname="Category3.name">{{ Category3.name }}</a>
-                    </em>
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-          <h3>
-            <a href="">箱包</a>
-          </h3>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -79,8 +96,10 @@ export default {
       isActive: -1,
       // 2级列表数据的容器
       Category2List: [],
-      // 判断是否移出了列表
+      // 判断鼠标是否移出了列表
       isStor: false,
+      // 判断鼠标是否在还在整个列表里面,来根据渲染列表
+      isCategoryEnter:false
     };
   },
   // 初始化1级列表
@@ -140,20 +159,33 @@ export default {
     // 点击列表跳转到搜索页并携带参数
     toSearch(e) {
       //如果没有categoryname属性值,说明点击的并不是分类列表
-      if(!e.target.dataset.categoryname) return
-
-      const {category1id,category2id,category3id,categoryname} = e.target.dataset
+      if (!e.target.dataset.categoryname) return;
+      this.isCategoryEnter = false
+      const { category1id, category2id, category3id, categoryname } =
+        e.target.dataset;
+      const params = this.$route.params;
       this.$router.push({
-        name:'Search',
-        query:{
-          category1Id:category1id,
-          category2Id:category2id,
-          category3Id:category3id,
-          categoryName:categoryname
-        }
+        name: "Search",
+        query: {
+          category1Id: category1id,
+          category2Id: category2id,
+          category3Id: category3id,
+          categoryName: categoryname,
+          params,
+        },
       });
     },
   },
+
+  computed:{
+    // 分类列表的渲染计算
+    CategoryIsShow(){
+      // 判断是否在home路由里面,如果在,则永久显示
+      if(this.$route.name === 'Home') return true
+      // 不在home路由里面的时候,如果鼠标在列表上面,则显示,不在,则隐藏
+      return this.isCategoryEnter
+    }
+  }
 };
 </script>
 

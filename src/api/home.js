@@ -1,4 +1,4 @@
-import { request } from "@/request";
+import { request ,requestMock} from "@/request";
 
 // 请求一级列表
 export const reqCategory1List = ()=>{
@@ -14,3 +14,14 @@ export const reqCategory2List = (Category1Id)=>{
 export const reqCategory3List = (Category2Id)=>{
     return request.get(`/admin/product/getCategory3/${Category2Id}`)
 }
+
+// 首页的轮播图
+export const reqBannerList = ()=>{
+    return requestMock.get(`/banner/list`)
+}
+
+// 楼层的轮播图
+export const reqFloorList = ()=>{
+    return requestMock.get(`/floor/list`)
+}
+
