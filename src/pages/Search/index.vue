@@ -467,22 +467,52 @@ export default {
   components: {
     SearchSelector,
   },
-  props: [
-    "keyword",
-    "category1Id",
-    "category2Id",
-    "category3Id",
-    "categoryName",
-  ],
-  mounted() {
-    reqSearchInfo({
-      keyword: this.keyword,
-      category1Id: this.category1Id,
-      category2Id: this.category2Id,
-      category3Id: this.category3Id,
-      categoryName: this.categoryName,
-    });
+  data() {
+    return {
+      SearchParams: {
+        category1Id: "",
+        category2Id: "",
+        category3Id: "",
+        categoryName: "",
+        keyword: "",
+        props: [],
+        trademark: "",
+        order: "",
+        pageNo: 1,
+        pageSize: 10,
+      },
+    };
   },
+  // 一开始是想使用props来进行初始化参数,但是vue不允许这种情况,所以我们使用的是直接获取路由上面的参数来进行初始化
+  // props: [
+  //   "keyword",
+  //   "category1Id",
+  //   "category2Id",
+  //   "category3Id",
+  //   "categoryName",
+  // ],
+  mounted() {
+    reqSearchInfo(this.SearchParams);
+  },
+  watch:{
+    $route:{
+      immediate:true,
+      handler(route){
+        // 解构路由参数
+        const {category1Id,category2Id,category3Id,categoryName} = route.query
+        const {keyword} = route.params
+        // 直接重写路由参数
+        this.SearchParams = {
+          ...this.SearchParams,
+          category1Id,
+          category2Id,
+          category3Id,
+          categoryName,
+          keyword
+        }
+      }
+    }
+  }
 };
 </script>
 

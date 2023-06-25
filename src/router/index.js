@@ -55,12 +55,12 @@ const router = new VueRouter({
             component:Search,
             name:'Search',
             // 把参数都传递给组件
-            props($route){
-                return {
-                    ...$route.params,
-                    ...$route.query,
-                }
-            }
+            // props($route){
+            //     return {
+            //         ...$route.params,
+            //         ...$route.query,
+            //     }
+            // }
         },
         {
             path:'*',
