@@ -46,6 +46,7 @@
                 <!-- 当order属性里面的值为1的时候就把active类名给到这个li -->
                 <li
                   :class="{ active: searchParams.order.split(':')[0] === '1' }"
+                  @click="order('1')"
                 >
                 <!-- 1.当order的值为asc的时候就用icon-manyue类名,否则用半月类名 2.当order的值为1的时候就显示,不为1就隐藏 -->
                   <a
@@ -63,6 +64,7 @@
                 <!-- 当order属性里面的值为2的时候就把active类名给到这个li -->
                 <li
                   :class="{ active: searchParams.order.split(':')[0] === '2' }"
+                  @click="order('2')"
                 >
                 <!-- 1.当order的值为asc的时候就用icon-manyue类名,否则用半月类名 2.当order的值为1的时候就显示,不为1就隐藏 -->
                   <a
@@ -228,6 +230,19 @@ export default {
     clearAttr(index) {
       this.searchParams.props.splice(index, 1);
     },
+
+    // 按钮排序,传入需要是什么按钮
+    order(nowType){
+      // 解构之前的按钮名字和排序
+      const [lastType,lastOrder] = this.searchParams.order.split(':')
+      // 当按钮还是同一个的时候,就只是将排序取反即可
+      if(nowType === lastType){
+        this.searchParams.order = `${nowType}:${lastOrder === 'desc' ? 'asc':'desc'}`
+        // 当不是同一个按钮的时候,就取现在的按钮,默认为降序
+      }else{
+        this.searchParams.order = `${nowType}:'desc'`
+      }
+    }
   },
 
   watch: {
