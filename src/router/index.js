@@ -53,7 +53,14 @@ const router = new VueRouter({
         {
             path:'/search/:keyword?',
             component:Search,
-            name:'Search'
+            name:'Search',
+            // 把参数都传递给组件
+            props($route){
+                return {
+                    ...$route.params,
+                    ...$route.query,
+                }
+            }
         },
         {
             path:'*',
