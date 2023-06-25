@@ -460,6 +460,7 @@
 
 <script>
 import SearchSelector from "./SearchSelector/SearchSelector";
+import { reqSearchInfo } from "@api/search";
 export default {
   name: "Search",
 
@@ -473,6 +474,15 @@ export default {
     "category3Id",
     "categoryName",
   ],
+  mounted() {
+    reqSearchInfo({
+      keyword: this.keyword,
+      category1Id: this.category1Id,
+      category2Id: this.category2Id,
+      category3Id: this.category3Id,
+      categoryName: this.categoryName,
+    });
+  },
 };
 </script>
 
