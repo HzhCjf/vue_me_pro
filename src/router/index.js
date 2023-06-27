@@ -8,7 +8,7 @@ const Login = ()=> import('@/pages/Login')
 const Register = ()=> import('@/pages/Register')
 const Search = ()=> import('@/pages/Search')
 const NotFound = ()=> import('@/pages/404')
-
+const Detail = ()=> import('@/pages/Detail')
 Vue.use(VueRouter)
 
 // 重写router的push和replace方法解决重复导航的bug
@@ -55,12 +55,17 @@ const router = new VueRouter({
             component:Search,
             name:'Search',
             // 把参数都传递给组件
-            props($route){
-                return {
-                    ...$route.params,
-                    ...$route.query,
-                }
-            }
+            // props($route){
+            //     return {
+            //         ...$route.params,
+            //         ...$route.query,
+            //     }
+            // }
+        },
+        {
+            path:'/detail/:skuId',
+            name:'Detail',
+            component:Detail
         },
         {
             path:'*',

@@ -48,7 +48,7 @@
                   :class="{ active: searchParams.order.split(':')[0] === '1' }"
                   @click="order('1')"
                 >
-                <!-- 1.当order的值为asc的时候就用icon-manyue类名,否则用半月类名 2.当order的值为1的时候就显示,不为1就隐藏 -->
+                  <!-- 1.当order的值为asc的时候就用icon-manyue类名,否则用半月类名 2.当order的值为1的时候就显示,不为1就隐藏 -->
                   <a
                     >综合<span
                       class="iconfont"
@@ -66,7 +66,7 @@
                   :class="{ active: searchParams.order.split(':')[0] === '2' }"
                   @click="order('2')"
                 >
-                <!-- 1.当order的值为asc的时候就用icon-manyue类名,否则用半月类名 2.当order的值为1的时候就显示,不为1就隐藏 -->
+                  <!-- 1.当order的值为asc的时候就用icon-manyue类名,否则用半月类名 2.当order的值为1的时候就显示,不为1就隐藏 -->
                   <a
                     >价格<span
                       class="iconfont"
@@ -87,7 +87,15 @@
               <li class="yui3-u-1-5" v-for="good in goodsList" :key="good.id">
                 <div class="list-wrap">
                   <div class="p-img">
-                    <a><img :src="good.defaultImg" /></a>
+                    <router-link
+                      :to="{
+                        name: 'Detail',
+                        params: {
+                          skuId: good.id,
+                        },
+                      }"
+                      ><img :src="good.defaultImg"
+                    /></router-link>
                   </div>
                   <div class="price">
                     <strong>
@@ -117,33 +125,12 @@
             </ul>
           </div>
           <div class="fr page">
-            <div class="sui-pagination clearfix">
-              <ul>
-                <li class="prev disabled">
-                  <a href="#">«上一页</a>
-                </li>
-                <li class="active">
-                  <a href="#">1</a>
-                </li>
-                <li>
-                  <a href="#">2</a>
-                </li>
-                <li>
-                  <a href="#">3</a>
-                </li>
-                <li>
-                  <a href="#">4</a>
-                </li>
-                <li>
-                  <a href="#">5</a>
-                </li>
-                <li class="dotted"><span>...</span></li>
-                <li class="next">
-                  <a href="#">下一页»</a>
-                </li>
-              </ul>
-              <div><span>共10页&nbsp;</span></div>
-            </div>
+            <Pagination
+              :pageNo.sync="searchParams.pageNo"
+              :total="total"
+              :totalPages="totalPages"
+              :continuePage="5"
+            />
           </div>
         </div>
       </div>
@@ -172,12 +159,21 @@ export default {
         props: [],
         trademark: "",
         order: "1:asc",
+        // 当前页
         pageNo: 1,
+        // 每页条数
         pageSize: 10,
       },
+      // 平台属性
       attrsList: [],
+      // 商品内容
       goodsList: [],
+      // 品牌
       trademarkList: [],
+      // 总条数
+      total: 0,
+      // 总页数
+      totalPages: 0,
     };
   },
 
@@ -204,6 +200,8 @@ export default {
       this.attrsList = result.attrsList;
       this.goodsList = result.goodsList;
       this.trademarkList = result.trademarkList;
+      this.total = result.total;
+      this.totalPages = result.totalPages;
     },
 
     //2. 子组件修改searchParams的trademark的 自定义事件函数
@@ -232,17 +230,19 @@ export default {
     },
 
     // 按钮排序,传入需要是什么按钮
-    order(nowType){
+    order(nowType) {
       // 解构之前的按钮名字和排序
-      const [lastType,lastOrder] = this.searchParams.order.split(':')
+      const [lastType, lastOrder] = this.searchParams.order.split(":");
       // 当按钮还是同一个的时候,就只是将排序取反即可
-      if(nowType === lastType){
-        this.searchParams.order = `${nowType}:${lastOrder === 'desc' ? 'asc':'desc'}`
+      if (nowType === lastType) {
+        this.searchParams.order = `${nowType}:${
+          lastOrder === "desc" ? "asc" : "desc"
+        }`;
         // 当不是同一个按钮的时候,就取现在的按钮,默认为降序
-      }else{
-        this.searchParams.order = `${nowType}:'desc'`
+      } else {
+        this.searchParams.order = `${nowType}:'desc'`;
       }
-    }
+    },
   },
 
   watch: {
@@ -525,7 +525,6 @@ export default {
         width: 733px;
         height: 66px;
         overflow: hidden;
-        float: right;
 
         .sui-pagination {
           margin: 18px 0;

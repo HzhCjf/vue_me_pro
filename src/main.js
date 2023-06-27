@@ -5,8 +5,10 @@ import TypeNav from '@comp/TypeNav'
 import "swiper/css/swiper.min.css";
 import Swiper from '@/components/Swiper'
 import '@/mock'
+import Pagination from '@/components/Pagination'
 Vue.config.productionTip = false
 Vue.component('Swiper',Swiper)
+Vue.component('Pagination',Pagination)
 
 
 // 把TypeNav组件设置为全局组件
