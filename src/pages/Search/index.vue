@@ -16,15 +16,16 @@
               }}<i @click="searchParams.trademark = ''">×</i>
             </li>
             <li class="with-x" v-if="searchParams.keyword">
-              搜索:{{ searchParams.keyword }}<i @click="clearKeyword">×</i>
+              搜索条件:{{ searchParams.keyword }}
+              <i @click="clearKeyword">×</i>
             </li>
             <li
               class="with-x"
               v-for="(item, index) in searchParams.props"
               :key="item"
             >
-              平台属性:{{ item.split(":")[1] }}--{{ item.split(":")[2]
-              }}<i @click="clearAttr(index)">×</i>
+              平台属性:{{ item.split(":")[2] }}--{{ item.split(":")[1] }}
+              <i @click="clearAttr(index)">×</i>
             </li>
           </ul>
         </div>
@@ -35,7 +36,6 @@
           :attrsList="attrsList"
           @changeTrademark="changeTrademark"
           @changeAttr="changeAttr"
-          @clearAttr="clearAttr"
         />
 
         <!--details-->
@@ -43,14 +43,13 @@
           <div class="sui-navbar">
             <div class="navbar-inner filter">
               <ul class="sui-nav">
-                <!-- 当order属性里面的值为1的时候就把active类名给到这个li -->
                 <li
                   :class="{ active: searchParams.order.split(':')[0] === '1' }"
                   @click="order('1')"
                 >
-                <!-- 1.当order的值为asc的时候就用icon-manyue类名,否则用半月类名 2.当order的值为1的时候就显示,不为1就隐藏 -->
                   <a
-                    >综合<span
+                    >综合
+                    <span
                       class="iconfont"
                       :class="
                         searchParams.order.split(':')[1] === 'asc'
@@ -58,17 +57,16 @@
                           : 'icon-banyue'
                       "
                       v-show="searchParams.order.split(':')[0] === '1'"
-                    ></span
-                  ></a>
+                    ></span>
+                  </a>
                 </li>
-                <!-- 当order属性里面的值为2的时候就把active类名给到这个li -->
                 <li
                   :class="{ active: searchParams.order.split(':')[0] === '2' }"
                   @click="order('2')"
                 >
-                <!-- 1.当order的值为asc的时候就用icon-manyue类名,否则用半月类名 2.当order的值为1的时候就显示,不为1就隐藏 -->
                   <a
-                    >价格<span
+                    >价格
+                    <span
                       class="iconfont"
                       :class="
                         searchParams.order.split(':')[1] === 'asc'
@@ -76,8 +74,8 @@
                           : 'icon-banyue'
                       "
                       v-show="searchParams.order.split(':')[0] === '2'"
-                    ></span
-                  ></a>
+                    ></span>
+                  </a>
                 </li>
               </ul>
             </div>
@@ -87,7 +85,15 @@
               <li class="yui3-u-1-5" v-for="good in goodsList" :key="good.id">
                 <div class="list-wrap">
                   <div class="p-img">
-                    <a><img :src="good.defaultImg" /></a>
+                    <router-link
+                      :to="{
+                        name: 'Detail',
+                        params: {
+                          skuId: good.id,
+                        },
+                      }"
+                      ><img :src="good.defaultImg"
+                    /></router-link>
                   </div>
                   <div class="price">
                     <strong>
@@ -117,33 +123,12 @@
             </ul>
           </div>
           <div class="fr page">
-            <div class="sui-pagination clearfix">
-              <ul>
-                <li class="prev disabled">
-                  <a href="#">«上一页</a>
-                </li>
-                <li class="active">
-                  <a href="#">1</a>
-                </li>
-                <li>
-                  <a href="#">2</a>
-                </li>
-                <li>
-                  <a href="#">3</a>
-                </li>
-                <li>
-                  <a href="#">4</a>
-                </li>
-                <li>
-                  <a href="#">5</a>
-                </li>
-                <li class="dotted"><span>...</span></li>
-                <li class="next">
-                  <a href="#">下一页»</a>
-                </li>
-              </ul>
-              <div><span>共10页&nbsp;</span></div>
-            </div>
+            <Pagination
+              :pageNo.sync="searchParams.pageNo"
+              :total="total"
+              :totalPages="totalPages"
+              :continuePage="5"
+            />
           </div>
         </div>
       </div>
@@ -178,6 +163,8 @@ export default {
       attrsList: [],
       goodsList: [],
       trademarkList: [],
+      total: 0,
+      totalPages: 0,
     };
   },
 
@@ -204,6 +191,8 @@ export default {
       this.attrsList = result.attrsList;
       this.goodsList = result.goodsList;
       this.trademarkList = result.trademarkList;
+      this.total = result.total;
+      this.totalPages = result.totalPages;
     },
 
     //2. 子组件修改searchParams的trademark的 自定义事件函数
@@ -211,38 +200,45 @@ export default {
       this.searchParams.trademark = value;
     },
 
-    // 请求搜索的标识,重新获取数据,并且绑定事件总线,去除掉搜索框里面的内容
+    //3. 点击清空搜索条件回调函数
     clearKeyword() {
+      //清空地址栏中的params参数，重新跳转路由即可
       this.$router.push({
         name: "Search",
         query: this.$route.query,
       });
+
+      //清空搜索框,使用组件通信的 $bus 事件总线 通知兄弟组件Header
       this.$bus.$emit("clearKeyword");
     },
 
-    // 添加平台属性的标识
+    //4. 子组件中 平台属性 点击的 事件回调函数
     changeAttr(value) {
+      //先判断当前的数组中是否存在该value,如果存在则直接不再向下执行
       if (this.searchParams.props.includes(value)) return;
+
       this.searchParams.props.push(value);
     },
 
-    // 删除单个平台属性的标识
+    //5. 删除平台属性标识的事件函数
     clearAttr(index) {
       this.searchParams.props.splice(index, 1);
     },
 
-    // 按钮排序,传入需要是什么按钮
-    order(nowType){
-      // 解构之前的按钮名字和排序
-      const [lastType,lastOrder] = this.searchParams.order.split(':')
-      // 当按钮还是同一个的时候,就只是将排序取反即可
-      if(nowType === lastType){
-        this.searchParams.order = `${nowType}:${lastOrder === 'desc' ? 'asc':'desc'}`
-        // 当不是同一个按钮的时候,就取现在的按钮,默认为降序
-      }else{
-        this.searchParams.order = `${nowType}:'desc'`
+    //6. 按钮排序逻辑
+    order(nowType) {
+      const [lastType, lastOrder] = this.searchParams.order.split(":");
+
+      //如果旧的type和新的type一致,则直接对排序取反即可
+      //如果不一致,则选中新的type 并默认降序
+      if (nowType === lastType) {
+        this.searchParams.order = `${nowType}:${
+          lastOrder === "desc" ? "asc" : "desc"
+        }`;
+      } else {
+        this.searchParams.order = `${nowType}:desc`;
       }
-    }
+    },
   },
 
   watch: {
@@ -255,6 +251,13 @@ export default {
         const { category1Id, category2Id, category3Id, categoryName } =
           route.query;
         const { keyword } = route.params;
+        //把新得到的在props中保存的动态路由参数 交给 初始化的 searchParams 数据
+        //分别赋值的写法 不如 使用扩展运算符展开并重写属性的写法 直观
+        /*  this.searchParams.category1Id = category1Id;
+        this.searchParams.category2Id = category2Id;
+        this.searchParams.category3Id = category3Id;
+        this.searchParams.categoryName = categoryName;
+        this.searchParams.keyword = keyword; */
 
         this.searchParams = {
           ...this.searchParams,
@@ -267,7 +270,6 @@ export default {
       },
     },
 
-    // 当数据发生改变的时候,重新获取数据
     searchParams: {
       deep: true,
       handler() {
@@ -525,7 +527,6 @@ export default {
         width: 733px;
         height: 66px;
         overflow: hidden;
-        float: right;
 
         .sui-pagination {
           margin: 18px 0;

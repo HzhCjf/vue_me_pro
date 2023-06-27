@@ -1,4 +1,5 @@
 import axios from "axios";
+import store from "@/store";
 const request  = axios.create({
     // 目标地址
     baseURL:process.env.VUE_APP_API1,
@@ -10,6 +11,7 @@ const request  = axios.create({
 
 // 请求拦截器
 request.interceptors.request.use((config)=>{
+    config.headers.userTempId = store.state.user.userTempId;
     return config
 })
 
