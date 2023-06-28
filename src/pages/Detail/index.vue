@@ -338,17 +338,23 @@ export default {
   },
   data() {
     return {
+      // 三级分类列表的等级
       categoryView:{},
+      // 购买属性
       spuSaleAttrList:{},
       skuInfo:{},
+      // 轮播图
       skuImageList:[]
     };
   },
   mounted() {
+    // 1.初始化请求详情数据
     this.getGoodDetail();
   },
   methods: {
+    // 1.请求详情数据
     async getGoodDetail() {
+      // 接受一个id请求详情
       const result = await reqGoodDetail(this.skuId);
       this.categoryView = result.categoryView
       this.spuSaleAttrList = result.spuSaleAttrList
@@ -357,6 +363,7 @@ export default {
     },
   },
   computed: {
+    // 获取地址栏id(params)
     skuId() {
       return this.$route.params.skuId;
     },

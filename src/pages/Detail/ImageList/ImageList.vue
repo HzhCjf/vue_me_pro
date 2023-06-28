@@ -1,6 +1,7 @@
 <template>
   <div class="swiper-container">
     <div class="swiper-wrapper">
+      <!-- 轮播图 -->
       <div class="swiper-slide" v-for="skuImage in skuImageList" :key="skuImage.id">
         <img :src="skuImage.imgUrl">
       </div>
