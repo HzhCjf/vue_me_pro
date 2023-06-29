@@ -342,7 +342,7 @@ export default {
       // 三级分类列表的等级
       categoryView:{},
       // 购买属性
-      spuSaleAttrList:{},
+      spuSaleAttrList:[],
       skuInfo:{},
       // 轮播图
       skuImageList:[],
