@@ -26,9 +26,9 @@
             <span class="price">{{ good.skuPrice }}</span>
           </li>
           <li class="cart-list-con5">
-            <a href="javascript:void(0)" class="mins" @click="changeNum(good.skuId,-1,good.skuNum)">-</a>
-            <input autocomplete="off" type="text" :value="good.skuNum" minnum="1" class="itxt">
-            <a href="javascript:void(0)" class="plus"  @click="changeNum(good.skuId,1,good.skuNum)">+</a>
+            <a href="javascript:void(0)" class="mins" @click="changeNum(good,-1,good)">-</a>
+            <input autocomplete="off" type="text" :value="good.skuNum" minnum="1" class="itxt" @change="setNum(good,$event)">
+            <a href="javascript:void(0)" class="plus"  @click="changeNum(good,1,good)">+</a>
           </li>
           <li class="cart-list-con6">
             <span class="sum">{{ good.skuPrice *  good.skuNum}}</span>
@@ -59,10 +59,11 @@
           <i class="summoney">{{ goodsPrice }}</i>
         </div>
         <div class="sumbtn">
-          <a class="sum-btn" href="###" target="_blank">结算</a>
+          <router-link to="/trade" class="sum-btn">结算</router-link>
         </div>
       </div>
     </div>
+    <div class="mark" v-show="isMark"></div>
   </div>
 </template>
 
@@ -74,28 +75,36 @@ import {reqAddCartOrChangeNum} from '@api/detail'
     data(){
       return{
         // 购物车列表数据
-        cartInfoList : []
+        cartInfoList : [],
+        // loading
+        isMark:false
       }
     },
     mounted(){
-      // console.log(this);
-      
       this.getShopCartList()
     },
     methods:{
       // 请求购物车列表数据
       async getShopCartList(){
+        this.isMark = true
          const result = await reqShopCartList()
         //  console.log(result);
         // 将列表数据放到数据中
          this.cartInfoList = result[0]? result[0].cartInfoList : []
+         this.isMark = false
+         this.cartInfoList.forEach(item=>{
+          // 为每一个商品都添加一个isReq属性,初始值为false
+          this.$set(item,'isReq',false)
+         })
       },
+
       // 切换选中状态,需要一个skuId和它的状态值isChecked
       async checkCart(skuId,isChecked){
         try{
           // 发起切换请求,当发起请求后,把状态值给改变,如果为1改为0,如果为0改为1
+          this.isMark = true
           await reqCheckCart(skuId,isChecked === 0 ? 1 : 0)
-          alert('选择成功')
+          // alert('选择成功')
           
           // 重新获取购物车列表
           this.getShopCartList()
@@ -108,8 +117,9 @@ import {reqAddCartOrChangeNum} from '@api/detail'
       async deleteCart(skuId){
         try{
           // 发起请求
+          this.isMark = true
           await reqDeleteCart(skuId)
-          alert('删除成功')
+          // alert('删除成功')
           // 重新获取购物车列表
           this.getShopCartList()
         }catch(e){
@@ -124,8 +134,9 @@ import {reqAddCartOrChangeNum} from '@api/detail'
           },[])
 
           try{
+            this.isMark = true
             await reqBatchDelete(skuIdList)
-            alert('已选商品删除成功')
+            // alert('已选商品删除成功')
 
             this.getShopCartList()
           }catch(e){
@@ -133,14 +144,47 @@ import {reqAddCartOrChangeNum} from '@api/detail'
           }
       },
 
-      async changeNum(skuId,num,skuNum){
+      // 更改商品数量按钮
+      async changeNum(good,num){
+        const {skuNum,skuId,isReq} = good
+        // 当isReq为true的时候,说明现在正在发起请求,所以直接返回
+        if(isReq) return
+
+        // 当数量小于等于1的时候就说明不能再往下减了,但是可以加,所以当是-1的时候直接返回
         if(skuNum <= 1 && num === -1) return 
+
+        // isReq是false,说明现在是要开始发起请求,把isReq改为true
+        good.isReq = true
         try{
+          this.isMark = true
           await reqAddCartOrChangeNum(skuId,num)
           // alert('商品数量更改成功')
-          this.getShopCartList()
+          await this.getShopCartList()
+          // 等请求发送完毕,再把isReq改为false,就可以继续开始更改数量了
+          good.isReq = false
         }catch(e){
           alert('数量更改失败')
+          //把isReq改为false,就可以继续开始更改数量了
+          good.isReq = false
+        }
+      },
+
+      // 输入更改数量
+      async setNum(good,e){
+        // 如果输入的不是数字或者小于等于0
+        if(isNaN(e.target.value) || e.target.value <= 0){
+          // 恢复为原来的值
+          e.target.value = good.skuNum
+        }
+
+        try{
+          // 请求更改数量
+          this.isMark = true
+          await reqAddCartOrChangeNum(good.skuId,e.target.value - good.skuNum)
+
+          this.getShopCartList()
+        }catch(e){
+          alert('失败')
         }
       }
     },
@@ -163,25 +207,28 @@ import {reqAddCartOrChangeNum} from '@api/detail'
           // 因为全选的请求需要一个isChecked和skuIdList所有商品状态值列表
           try{
             // 把全选的状态值给用三元转换为1或者0,用skuIdList一起发起请求
+            this.isMark = true
             await reqBatchCheckCart(newVal ? 1 :0,skuIdList)
-            alert('全选成功')
+            // alert('全选成功')
             this.getShopCartList()
           }catch(e){
             alert('全选失败')
           }
         }
       },
+      // 商品件数
       goodsNum(){
         return this.cartInfoList.reduce((p,c)=>{
             return c.isChecked === 1? p+c.skuNum :p
           },0)
       },
+      // 商品总价
       goodsPrice(){
         return this.cartInfoList.reduce((p,c)=>{
             return c.isChecked === 1? p+c.skuPrice *  c.skuNum :p
           },0)
       }
-    }
+    },
   }
 </script>
 
@@ -189,6 +236,18 @@ import {reqAddCartOrChangeNum} from '@api/detail'
   .cart {
     width: 1200px;
     margin: 0 auto;
+    position: relative;
+
+    .mark{
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top:0;
+      background:url('https://hbimg.b0.upaiyun.com/26cdedb3deada7bd52c32a1ecfdb6a2329ffe47e2851-MXP5q2_fw658') 0 0 no-repeat ;
+      background-size: 100% 100%;
+      opacity: .5;
+    }
 
     h4 {
       margin: 9px 0;
