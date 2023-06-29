@@ -16,9 +16,10 @@
         <!-- 左侧放大镜区域 -->
         <div class="previewWrap">
           <!--放大镜效果-->
-          <Zoom  :skuImageList="skuImageList"/>
+          <Zoom  :skuImageList="skuImageList" :nowIndex="nowIndex"/>
           <!-- 小图列表 -->
-          <ImageList :skuImageList="skuImageList"/>
+          <!-- 用.sync修饰符直接与nowIndex进行了双向绑定 -->
+          <ImageList :skuImageList="skuImageList" :nowIndex.sync="nowIndex"/>
         </div>
         <!-- 右侧选择区域布局 -->
         <div class="InfoWrap">
@@ -77,14 +78,14 @@
               <div class="choosed"></div>
               <dl v-for="spuSaleAttr in spuSaleAttrList" :key="spuSaleAttr.id">
                 <dt class="title" >{{ spuSaleAttr.saleAttrName }}</dt>
-                <dd  class="active" v-for="spuSaleAttrValue in spuSaleAttr.spuSaleAttrValueList" :key="spuSaleAttrValue.id">{{ spuSaleAttrValue.id }}</dd>
+                <dd  :class="{active:spuSaleAttrValue.isChecked === '1'}" v-for="spuSaleAttrValue,index in spuSaleAttr.spuSaleAttrValueList" :key="spuSaleAttrValue.id" @click="changeAttr(spuSaleAttr.spuSaleAttrValueList,index)">{{ spuSaleAttrValue.saleAttrValueName }}</dd>
               </dl>
             </div>
             <div class="cartWrap">
               <div class="controls">
-                <input autocomplete="off" class="itxt" />
-                <a href="javascript:" class="plus">+</a>
-                <a href="javascript:" class="mins">-</a>
+                <input autocomplete="off" class="itxt" readonly v-model="skuNum" />
+                <a href="javascript:" class="plus" @click="changeNum(1)">+</a>
+                <a href="javascript:" class="mins" @click="changeNum(-1)">-</a>
               </div>
               <div class="add">
                 <a href="javascript:">加入购物车</a>
@@ -344,7 +345,10 @@ export default {
       spuSaleAttrList:{},
       skuInfo:{},
       // 轮播图
-      skuImageList:[]
+      skuImageList:[],
+      // 切换轮播图下标
+      nowIndex:0,
+      skuNum:1
     };
   },
   mounted() {
@@ -361,6 +365,24 @@ export default {
       this.skuInfo = result.skuInfo
       this.skuImageList = result.skuInfo.skuImageList
     },
+
+    // 2.平台属性的选择
+    changeAttr(list,index){
+      list.forEach(item=>{
+        item.isChecked = '0'
+      })
+
+      list[index].isChecked = '1'
+    },
+
+
+    // 3.改变商品的数量
+    changeNum(num){
+      this.skuNum += num
+      if(this.skuNum <=0){
+        this.skuNum = 1
+      }
+    }
   },
   computed: {
     // 获取地址栏id(params)
