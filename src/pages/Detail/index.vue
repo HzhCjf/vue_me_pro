@@ -16,10 +16,10 @@
         <!-- 左侧放大镜区域 -->
         <div class="previewWrap">
           <!--放大镜效果-->
-          <Zoom  :skuImageList="skuImageList" :nowIndex="nowIndex"/>
+          <Zoom :skuImageList="skuImageList" :nowIndex="nowIndex" />
           <!-- 小图列表 -->
           <!-- 用.sync修饰符直接与nowIndex进行了双向绑定 -->
-          <ImageList :skuImageList="skuImageList" :nowIndex.sync="nowIndex"/>
+          <ImageList :skuImageList="skuImageList" :nowIndex.sync="nowIndex" />
         </div>
         <!-- 右侧选择区域布局 -->
         <div class="InfoWrap">
@@ -77,18 +77,34 @@
             <div class="chooseArea">
               <div class="choosed"></div>
               <dl v-for="spuSaleAttr in spuSaleAttrList" :key="spuSaleAttr.id">
-                <dt class="title" >{{ spuSaleAttr.saleAttrName }}</dt>
-                <dd  :class="{active:spuSaleAttrValue.isChecked === '1'}" v-for="spuSaleAttrValue,index in spuSaleAttr.spuSaleAttrValueList" :key="spuSaleAttrValue.id" @click="changeAttr(spuSaleAttr.spuSaleAttrValueList,index)">{{ spuSaleAttrValue.saleAttrValueName }}</dd>
+                <dt class="title">{{ spuSaleAttr.saleAttrName }}</dt>
+                <dd
+                  :class="{ active: spuSaleAttrValue.isChecked === '1' }"
+                  v-for="(
+                    spuSaleAttrValue, index
+                  ) in spuSaleAttr.spuSaleAttrValueList"
+                  :key="spuSaleAttrValue.id"
+                  @click="changeAttr(spuSaleAttr.spuSaleAttrValueList, index)"
+                >
+                  {{ spuSaleAttrValue.saleAttrValueName }}
+                </dd>
               </dl>
             </div>
             <div class="cartWrap">
               <div class="controls">
-                <input autocomplete="off" class="itxt" readonly v-model="skuNum" />
+                <input
+                  autocomplete="off"
+                  class="itxt"
+                  readonly
+                  v-model="skuNum"
+                />
                 <a href="javascript:" class="plus" @click="changeNum(1)">+</a>
                 <a href="javascript:" class="mins" @click="changeNum(-1)">-</a>
               </div>
               <div class="add">
-                <a href="javascript:">加入购物车</a>
+                <a href="javascript:" @click="addCart"
+                  >加入购物车</a
+                >
               </div>
             </div>
           </div>
@@ -329,7 +345,7 @@
 <script>
 import ImageList from "./ImageList/ImageList";
 import Zoom from "./Zoom/Zoom";
-import { reqGoodDetail } from "@api/detail";
+import { reqGoodDetail ,reqAddCartOrChangeNum} from "@api/detail";
 export default {
   name: "Detail",
 
@@ -340,15 +356,15 @@ export default {
   data() {
     return {
       // 三级分类列表的等级
-      categoryView:{},
+      categoryView: {},
       // 购买属性
-      spuSaleAttrList:[],
-      skuInfo:{},
+      spuSaleAttrList: [],
+      skuInfo: {},
       // 轮播图
-      skuImageList:[],
+      skuImageList: [],
       // 切换轮播图下标
-      nowIndex:0,
-      skuNum:1
+      nowIndex: 0,
+      skuNum: 1,
     };
   },
   mounted() {
@@ -360,28 +376,60 @@ export default {
     async getGoodDetail() {
       // 接受一个id请求详情
       const result = await reqGoodDetail(this.skuId);
-      this.categoryView = result.categoryView
-      this.spuSaleAttrList = result.spuSaleAttrList
-      this.skuInfo = result.skuInfo
-      this.skuImageList = result.skuInfo.skuImageList
+      this.categoryView = result.categoryView;
+      this.spuSaleAttrList = result.spuSaleAttrList;
+      this.skuInfo = result.skuInfo;
+      this.skuImageList = result.skuInfo.skuImageList;
     },
 
     // 2.平台属性的选择
-    changeAttr(list,index){
-      list.forEach(item=>{
-        item.isChecked = '0'
-      })
+    changeAttr(list, index) {
+      list.forEach((item) => {
+        item.isChecked = "0";
+      });
 
-      list[index].isChecked = '1'
+      list[index].isChecked = "1";
     },
 
-
     // 3.改变商品的数量
-    changeNum(num){
-      this.skuNum += num
-      if(this.skuNum <=0){
-        this.skuNum = 1
+    changeNum(num) {
+      this.skuNum += num;
+      if (this.skuNum <= 0) {
+        this.skuNum = 1;
       }
+    },
+
+    async addCart(){
+      const saleAttrList = this.spuSaleAttrList.reduce((p,c)=>{
+        // 创建一个对象来保存销售属性的名称和值
+        const saleAttr = {}
+        // 将名称放入对象中
+        saleAttr.attrName = c.saleAttrName
+        // 查找出销售属性里面isChecked为1的属性
+        const checkedAttrValue = c.spuSaleAttrValueList.find(item=>{
+          return item.isChecked === '1'
+        })
+        // 将isChecked为1的属性的值放入对象里
+        saleAttr.attrValue = checkedAttrValue.saleAttrValueName
+        // 然后将对象放入数组里面
+        p.push(saleAttr)
+        // 返回数组
+        return p
+      },[])
+
+      const goodData = {
+        skuImg: this.skuInfo.skuDefaultImg,
+        skuName: this.skuInfo.skuName,
+        skuNum: this.skuNum,
+        saleAttrList: saleAttrList,
+      }
+
+      sessionStorage.setItem('goodData',JSON.stringify(goodData))
+
+      await reqAddCartOrChangeNum(this.skuId,this.skuNum)
+      alert('加入购物车成功')
+
+      this.$router.push('/addCartSuccess')
     }
   },
   computed: {

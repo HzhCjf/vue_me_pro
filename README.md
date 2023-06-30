@@ -431,3 +431,151 @@ vue.config.js 文件里面
 - 把输入框的位置变成只读,然后给其双向绑定数据skuNum
 - 给两个按钮添加点击事件changeSkuNum,带参数1或者-1
 - 当点击时候,把skuNum累加,判断skuNum是否小于等于0,一旦小于或者等于那么就把skuNum设置为1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 登录流程:
+- 先把静态写好,然后拿到表单数据,手机号和密码,在api里面写好登录的请求,然后到vuex里面的模块的state里面先写入token,在actions里面请求登录获取到token,提交到mutations里面,然后将请求到的token赋值为state里面的token,然后在登录组件里面用辅助函数mapActions来使用表单数据来进行获取token
+- 如果需要持久化token,可以创建一插件,先定义tokenKey='token',然后定义一个获取token的函数,在里面获取本地存储的tokenKey,如果没有就返回一个空字符串,再定义一个改变本地存储token的函数,改变的时候接受一个token,与键名tokenKey进行关联,还有一个删除本地存储token的函数,来删除与tokenKey相关联的数据
+- 将vuex里面的token放在拦截器的请求头里面,然后写一个获取用户信息的请求,在vuex模块里面的state里面创建一个userInfo来存储用户信息,初始是一个空对象,在actions里面创建一个函数开始请求用户信息,用一个变量result接收,接着用commit提交给mutations,并且携带者result里的用户信息,mutations里面创建一个函数来接收actions里面提交过来的数据,将数据赋值给state里面用来存储用户信息的对象,再书写一个清除token的函数,将state里面的token清空,然后用插件里面删除token的函数来进行删除本地存储的token
+- 以上是路由鉴权的准备阶段,将方法都准备好后开始路由鉴权,在路由文件里面创建全局前置守卫,先获取vuex里面的token,然后获取vuex里面的用户信息里面的nickName
+- 判断有没有token,如果有,判断去的地方是不是登录页面,如果是,就直接跳转到首页,然后判断是否从首页过去的,如果是就把进度条给关掉,虽然进度条没什么影响,但是影响美观....然后开始判断有没有用户信息,如果有就放行,没有就用store.dispatch调用请求用户信息函数来获取,请求成功返回一个成功的promise,然后进行放行,如果没成功就进入catch,开始用store.commit调用清除vuex里面的token,然后跳转到登录页面
+- 如果没有token,判断当前要去的地方在不在白名单之类,或者说需不需要权限,可以用路由配置里面的meta来设置白名单,如果需要权限就直接跳转到登录页面,不需要就放行
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 2023-6-27
+
+### 加入购物车成功页
+- 将`AddCartSuccess`静态组件移入pages
+- 给其配置路由
+- 在详情组件中给和购物车有关的都添加上跳转
+
+
+### 加入购物车成功页展示数据
+- Detail
+- 在点击加入购物车的时候为其创建一个事件函数addCart
+- 先来获取销售属性的名称和值,创建一个变量saleAttrList 来接收spuSaleAttrList销售属性的值,用reduce方法来进去获取,先创建一个对象saleAttr用来保存属性名称,然后用 saleAttr.attrName保存他的名称
+- 用checkedAttrValue 来接收spuSaleAttrList查找的isChecked是否是1的
+- 用saleAttr.attrValue来接收checkedAttrValue 里面的值
+- 把对象saleAttr放入p中,然后返回p
+- 开始组装要传递给本地临时存储的数据goodData :
+  ```js 
+      skuImg: this.skuInfo.skuDefaultImg,
+      skuName: this.skuInfo.skuName,
+      skuNum: this.skuNum,
+      saleAttrList: saleAttrList,
+  ```
+- 临时存储:sessionStorage.setItem来进行存储,第一个值为名称,第二个为数据,要转成json格式的
+- 跳转到购物车完成页
+- AddCartSuccess
+- 在data中创建一个状态来接收本地临时存储的值
+- 把数据放在模板中渲染
+
+
+### 发送加入购物车请求
+- 在detail.js中请求添加购物车和修改购物车数量reqAddCartOrChangeNum 
+- 接口:/api/cart/addToCart/${skuId}/${skuNum} post
+- Detail
+- 在加入购物车的时候发起请求,没有返回值
+
+
+
+### 购物车-静态
+- 将ShopCart组件移入pages里面,为其配置路由
+- Hearder点击购物车的时候进行跳转,还有购物完成页的结算也要进行跳转
+
+
+### 购物车-购物车列表请求
+- 创建shopCart.js,发起请求购物车列表reqShopCartList ,接口:/api/cart/cartList get
+- ShopCart
+- 请求购物车getShopCartList
+
+
+### 购物车-初始化vuex
+- 安装vuex@3
+- 创建store文件夹,在里面创建modules模块文件,创建user.js,需要给用户创建一个临时id,因为还没登录,但是可以用购物车,用户体验更好,在state里面创建临时id:userTempId
+- 在store里面的index里面引入模块
+- 在入口文件中注入store
+
+
+### 购物车-在vuex中保存用户临时id
+- 下载nanoid
+- 先在utils文件夹中,创建插件userTempId
+- 先引入nanoid,在定义本地存储的key,userTempId='userTempId',直接暴露函数getUserTempId,先判断本地存储中是否存在临时id,如果有就获取这个临时id,没有就在本地存储中设置临时id,然后返回id
+- 在user.js中引入,然后给到state中的临时id
+
+
+### 购物车-请求时配置用户临时ID
+- 在请求拦截器的时候在头部加入userTempId,在vuex里面获取
+
+### 购物车-列表渲染
+- ShopCart
+- 在data中创建状态cartInfoList来接收请求到的购物车列表,然后渲染模板
+- this.cartInfoList = result[0] ? result[0].cartInfoList : [];
+
+
+### 购物车-切换商品选中状态
+- shopCart.js
+- 请求切换商品选中状态reqCheckCart ,接口:/api/cart/checkCart/${skuID}/${isChecked} get
+- ShopCart
+- 请求切换商品选中状态,当isChecked为0的时候改为1,反之为0,在切换选框里面为添家change事件函数checkCart
+- 每次改变了数据,都需要再请求一边购物车列表数据
+### 购物车-删除购物车商品
+- shopCart.js
+- 请求删除购物车商品reqDeleteCart ,接口/api/cart/deleteCart/${skuId}  delete
+- ShopCart
+- 在删除那里添加点击事件deleteCart,请求删除购物车商品,重新请求购物车列表数据
+
+### 购物车-购物车的全选按钮
+- shopCart.js
+- 请求批量选中购物车商品reqBatchCheckCart  ,接口/api/cart/batchCheckCart/${isChecked}`, skuIdList  post ,,skuIdList是所有商品id组成的数组
+- 为全选绑定一个计算属性bacthCheck
+- 在计算属性的get里面判断购物车列表中的所有商品是否全选,用every来根据isChecked来判断
+- 在set中,接收一个newVal,newVal就是全选改变后的值,用变量skuIdList来接收在购物车列表中用reduce累加出来的id,可以用[...p,c.skuId],这样每一次循环都是把之前循环的id展开,然后添加上现在被循环的id
+- 请求批量选中购物车商品,请求的时候当newVal为true的时候变成1,反之为0,重新请求购物车列表数据
+
+
+### 购物车-删除选中商品
+- shopCart.js
+- 请求删除所有选中的商品reqBatchDelete 接口:/api/cart/batchDeleteCart`, skuIdList ,,post请求
+- 给删除选中的商品添加点击事件函数batchDelete
+- 还是跟全选中一样的方式获取所有商品的id
+- 然后发起请求,重新请求购物车列表数据
+
+### 购物车-其他计算
+- 为已选择多少件商品创建计算属性goodsNum
+- 用reduce来累加,当isChecked为1的时候就进行累加
+- 为总价创建计算属性goodsPrice 
+- 用reduce来进行累加,当isChecked为1的时候,累加单价*数量,否则只是返回p
+
+
+### 购物车-商品数量的点击累加和累减
+- 为减号和加号添加上点击事件函数changeNum,需要用到id和num-1或者1,还要数量skuNum
+- 当数量为1并且num为-1的时候直接返回,不然就要减到负数或者0了
+- 发起加入购物车的请求,引入detail中的reqAddCartOrChangeNum,需要用id和num,重新获取购物车列表数据

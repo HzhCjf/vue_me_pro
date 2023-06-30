@@ -6,6 +6,7 @@ import "swiper/css/swiper.min.css";
 import Swiper from '@/components/Swiper'
 import '@/mock'
 import Pagination from '@/components/Pagination'
+import store from './store';
 Vue.config.productionTip = false
 Vue.component('Swiper',Swiper)
 Vue.component('Pagination',Pagination)
@@ -18,5 +19,6 @@ new Vue({
   router,
   beforeCreate(){
     Vue.prototype.$bus = this
-  }
+  },
+  store
 }).$mount('#app')

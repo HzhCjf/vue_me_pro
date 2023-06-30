@@ -9,6 +9,8 @@ const Register = ()=> import('@/pages/Register')
 const Search = ()=> import('@/pages/Search')
 const NotFound = ()=> import('@/pages/404')
 const Detail = ()=> import('@/pages/Detail')
+const AddCartSuccess = ()=> import('@/pages/AddCartSuccess')
+const ShopCart = ()=> import('@/pages/ShopCart')
 Vue.use(VueRouter)
 
 // 重写router的push和replace方法解决重复导航的bug
@@ -66,6 +68,16 @@ const router = new VueRouter({
             path:'/detail/:skuId',
             name:'Detail',
             component:Detail
+        },
+        {
+            path:'/addCartSuccess',
+            name:'AddCartSuccess',
+            component:AddCartSuccess
+        },
+        {
+            path:'/shopCart',
+            name:'ShopCart',
+            component:ShopCart
         },
         {
             path:'*',
