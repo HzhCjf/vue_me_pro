@@ -5,14 +5,19 @@
       <div class="container">
         <div class="loginList">
           <p>尚品汇欢迎您！</p>
-          <p>
+          <p v-if="userInfo.nickName">
+            <span>欢迎您</span>
+            <span>{{ userInfo.nickName }}</span>
+            <a @click="logout">退出登录</a>
+          </p>
+          <p v-else>
             <span>请</span>
             <router-link to="/login">登录</router-link>
             <router-link to="/register" class="register">免费注册</router-link>
           </p>
         </div>
         <div class="typeList">
-          <a href="###">我的订单</a>
+          <router-link to="/center">我的订单</router-link>
           <router-link to="/shopCart">我的购物车</router-link>
           <a href="###">我的尚品汇</a>
           <a href="###">尚品汇会员</a>
@@ -48,6 +53,8 @@
 </template>
   
   <script>
+  import { mapState,mapMutations } from 'vuex';
+  import {reqLogout} from '@api/user'
 export default {
   name: "Header",
   data(){
@@ -61,6 +68,7 @@ export default {
     })
   },
   methods:{
+    ...mapMutations('user',['clear_Token']),
     toSearch(){
       const query = this.$route.query
       this.$router.push({
@@ -70,7 +78,21 @@ export default {
         },
         query
       })
+    },
+    async logout(){
+      try{
+        await reqLogout()
+        this.clear_Token()
+        this.$router.push("/login");
+        this.$message.success('退出登录成功')
+      }catch(e){
+        this.$message.error('退出登录失败')
+      }
+     
     }
+  },
+  computed:{
+    ...mapState('user',['userInfo'])
   }
 };
 </script>

@@ -104,12 +104,12 @@ import {reqAddCartOrChangeNum} from '@api/detail'
           // 发起切换请求,当发起请求后,把状态值给改变,如果为1改为0,如果为0改为1
           this.isMark = true
           await reqCheckCart(skuId,isChecked === 0 ? 1 : 0)
-          // alert('选择成功')
+          this.$message.success('选择成功')
           
           // 重新获取购物车列表
           this.getShopCartList()
         }catch(e){
-          alert('选择失败')
+          this.$message.error('选择失败')
         }
       },
       
@@ -119,11 +119,11 @@ import {reqAddCartOrChangeNum} from '@api/detail'
           // 发起请求
           this.isMark = true
           await reqDeleteCart(skuId)
-          // alert('删除成功')
+          this.$message.success('删除成功')
           // 重新获取购物车列表
           this.getShopCartList()
         }catch(e){
-          alert('删除失败')
+          this.$message.error('删除失败')
         }
       },
 
@@ -136,11 +136,11 @@ import {reqAddCartOrChangeNum} from '@api/detail'
           try{
             this.isMark = true
             await reqBatchDelete(skuIdList)
-            // alert('已选商品删除成功')
+            this.$message.success('已选商品删除成功')
 
             this.getShopCartList()
           }catch(e){
-            alert('已选商品删除失败')
+            this.$message.error('已选商品删除失败')
           }
       },
 
@@ -158,12 +158,12 @@ import {reqAddCartOrChangeNum} from '@api/detail'
         try{
           this.isMark = true
           await reqAddCartOrChangeNum(skuId,num)
-          // alert('商品数量更改成功')
+          this.$message.success('商品数量更改成功')
           await this.getShopCartList()
           // 等请求发送完毕,再把isReq改为false,就可以继续开始更改数量了
           good.isReq = false
         }catch(e){
-          alert('数量更改失败')
+          this.$message.error('数量更改失败')
           //把isReq改为false,就可以继续开始更改数量了
           good.isReq = false
         }
@@ -181,10 +181,11 @@ import {reqAddCartOrChangeNum} from '@api/detail'
           // 请求更改数量
           this.isMark = true
           await reqAddCartOrChangeNum(good.skuId,e.target.value - good.skuNum)
-
+          this.$message.success('数量更改成功')
           this.getShopCartList()
+          
         }catch(e){
-          alert('失败')
+          this.$message.error('更改数量失败')
         }
       }
     },
@@ -209,10 +210,10 @@ import {reqAddCartOrChangeNum} from '@api/detail'
             // 把全选的状态值给用三元转换为1或者0,用skuIdList一起发起请求
             this.isMark = true
             await reqBatchCheckCart(newVal ? 1 :0,skuIdList)
-            // alert('全选成功')
+            this.$message.success('全选成功')
             this.getShopCartList()
           }catch(e){
-            alert('全选失败')
+            this.$message.error('全选失败')
           }
         }
       },

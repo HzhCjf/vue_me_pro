@@ -88,7 +88,7 @@ export default {
   methods: {
     // 获取验证码
     async getCode() {
-      if (!(this.userInfo.phone.length === 11)) return alert("手机号格式错误");
+      if (!(this.userInfo.phone.length === 11)) return this.$message.error("手机号格式错误");
       // 禁用获取验证码按钮
       this.isDisabled = true;
       // 验证码倒计时和禁用按钮倒计时
@@ -111,16 +111,17 @@ export default {
       const { phone, password, passwordAgain, isAgree, code } = this.userInfo;
       // 必须每一个输入框都填写
       if (!(phone && password && password === passwordAgain && isAgree && code))
-        return alert("必须全部进行填写!!!");
+        return this.$message.error("必须全部进行填写!!!");
 
       try {
         // 请求注册
         await reqRegister(this.userInfo);
         // 跳转至登录页
         this.$router.push("/login");
+        this.$message.success('注册成功')
       } catch (e) {
         // 错误信息
-        alert(e.message);
+        this.$message.error('注册失败'+e.message)
       }
     },
   },

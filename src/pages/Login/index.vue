@@ -95,11 +95,19 @@ export default {
     async login() {
       try {
         // 使用里面的请求token方法,放入参数
-        this.getToken(this.userInfo);
-        // 登录之后直接跳转到首页
-        this.$router.push('/home')
+        await this.getToken(this.userInfo);
+
+        const to = this.$route.query.to;  
+        if (to) {
+          this.$router.push({ name: to });
+        } else {
+          // 登录之后直接跳转到首页
+          this.$router.push("/home");
+          // this.$message.success('登录成功')
+        }
       } catch (e) {
-        alert("登录失败");
+        this.$message.error(e)
+        console.log(e);
       }
     },
   },

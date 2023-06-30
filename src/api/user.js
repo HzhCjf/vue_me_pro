@@ -18,3 +18,8 @@ export const reqLogin = (userInfo)=>{
 export const reqUserInfo = ()=>{
     return request.get(`/api/user/passport/auth/getUserInfo`)
 }
+
+// 请求退出登录
+export const reqLogout = () => {
+    return request.get(`/api/user/passport/logout`);
+  };
