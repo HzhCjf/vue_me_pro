@@ -1,4 +1,4 @@
-import getUserTempId from "@/utils/userTempId";
+import getUserTempId from "@/utils/userTempid";
 import { reqLogin, reqUserInfo } from '@api/user'
 import { getToken, setToken, removeToken } from '@/utils/token'
 const state = {
