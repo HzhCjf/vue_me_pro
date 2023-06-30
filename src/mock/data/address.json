@@ -1,0 +1,26 @@
+[
+    {
+        "id": "001",
+        "consignee": "萧炎",
+        "consigneeTel": "15572148888",
+        "deliveryAddress": "斗气大陆偏北的加玛帝国乌坦城",
+        "isDefault": 1,
+        "isSelect": 1
+    },
+    {
+        "id": "002",
+        "consignee": "韩立",
+        "consigneeTel": "13700008888",
+        "deliveryAddress": "天南越国镜州青牛镇五里沟",
+        "isDefault": 0,
+        "isSelect": 0
+    },
+    {
+        "id": "003",
+        "consignee": "李火旺",
+        "consigneeTel": "13888888888",
+        "deliveryAddress": "地球或者大摊世界",
+        "isDefault": 0,
+        "isSelect": 0
+    }
+]

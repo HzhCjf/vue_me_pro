@@ -7,9 +7,10 @@
     <section class="con">
       <!-- 导航路径区域 -->
       <div class="conPoin">
-        <span>{{ categoryView.category1Name }}</span>
-        <span>{{ categoryView.category2Name }}</span>
-        <span>{{ categoryView.category3Name }}</span>
+        <span>手机、数码、通讯</span>
+        <span>手机</span>
+        <span>Apple苹果</span>
+        <span>iphone 6S系类</span>
       </div>
       <!-- 主要内容区域 -->
       <div class="mainCon">
@@ -18,7 +19,6 @@
           <!--放大镜效果-->
           <Zoom :skuImageList="skuImageList" :nowIndex="nowIndex" />
           <!-- 小图列表 -->
-          <!-- 用.sync修饰符直接与nowIndex进行了双向绑定 -->
           <ImageList :skuImageList="skuImageList" :nowIndex.sync="nowIndex" />
         </div>
         <!-- 右侧选择区域布局 -->
@@ -28,7 +28,7 @@
               {{ skuInfo.skuName }}
             </h3>
             <p class="news">
-              推荐选择下方[移动优惠购],手机套餐齐搞定,不用换号,每月还有花费返
+              {{ skuInfo.skuDesc }}
             </p>
             <div class="priceArea">
               <div class="priceArea1">
@@ -37,7 +37,7 @@
                 </div>
                 <div class="price">
                   <i>¥</i>
-                  <em>{{ skuInfo.price }}</em>
+                  <em> {{ skuInfo.price }}</em>
                   <span>降价通知</span>
                 </div>
                 <div class="remark">
@@ -76,17 +76,17 @@
           <div class="choose">
             <div class="chooseArea">
               <div class="choosed"></div>
-              <dl v-for="spuSaleAttr in spuSaleAttrList" :key="spuSaleAttr.id">
-                <dt class="title">{{ spuSaleAttr.saleAttrName }}</dt>
+              <dl v-for="saleAttr in spuSaleAttrList" :key="saleAttr.id">
+                <dt class="title">{{ saleAttr.saleAttrName }}</dt>
                 <dd
-                  :class="{ active: spuSaleAttrValue.isChecked === '1' }"
                   v-for="(
-                    spuSaleAttrValue, index
-                  ) in spuSaleAttr.spuSaleAttrValueList"
-                  :key="spuSaleAttrValue.id"
-                  @click="changeAttr(spuSaleAttr.spuSaleAttrValueList, index)"
+                    saleAttrValue, index
+                  ) in saleAttr.spuSaleAttrValueList"
+                  :key="saleAttrValue.id"
+                  :class="{ active: saleAttrValue.isChecked === '1' }"
+                  @click="changeAttrValue(saleAttr.spuSaleAttrValueList, index)"
                 >
-                  {{ spuSaleAttrValue.saleAttrValueName }}
+                  {{ saleAttrValue.saleAttrValueName }}
                 </dd>
               </dl>
             </div>
@@ -98,13 +98,15 @@
                   readonly
                   v-model="skuNum"
                 />
-                <a href="javascript:" class="plus" @click="changeNum(1)">+</a>
-                <a href="javascript:" class="mins" @click="changeNum(-1)">-</a>
+                <a href="javascript:" class="plus" @click="changeSkuNum(1)"
+                  >+</a
+                >
+                <a href="javascript:" class="mins" @click="changeSkuNum(-1)"
+                  >-</a
+                >
               </div>
               <div class="add">
-                <a href="javascript:" @click="addCart"
-                  >加入购物车</a
-                >
+                <a href="javascript:" @click="addCart">加入购物车</a>
               </div>
             </div>
           </div>
@@ -341,11 +343,11 @@
     </section>
   </div>
 </template>
-
-<script>
+  
+  <script>
 import ImageList from "./ImageList/ImageList";
 import Zoom from "./Zoom/Zoom";
-import { reqGoodDetail ,reqAddCartOrChangeNum} from "@api/detail";
+import { reqGoodDetail ,reqAddCartOrChangeNum} from "@/api/detail";
 export default {
   name: "Detail",
 
@@ -355,35 +357,30 @@ export default {
   },
   data() {
     return {
-      // 三级分类列表的等级
       categoryView: {},
-      // 购买属性
-      spuSaleAttrList: [],
       skuInfo: {},
-      // 轮播图
+      spuSaleAttrList: [],
       skuImageList: [],
-      // 切换轮播图下标
       nowIndex: 0,
       skuNum: 1,
     };
   },
   mounted() {
-    // 1.初始化请求详情数据
+    //1.初始化请求商品详情
     this.getGoodDetail();
   },
   methods: {
-    // 1.请求详情数据
+    //1.获取商品详情
     async getGoodDetail() {
-      // 接受一个id请求详情
       const result = await reqGoodDetail(this.skuId);
+      console.log(result);
       this.categoryView = result.categoryView;
-      this.spuSaleAttrList = result.spuSaleAttrList;
       this.skuInfo = result.skuInfo;
+      this.spuSaleAttrList = result.spuSaleAttrList;
       this.skuImageList = result.skuInfo.skuImageList;
     },
-
-    // 2.平台属性的选择
-    changeAttr(list, index) {
+    //2.销售属性排他
+    changeAttrValue(list, index) {
       list.forEach((item) => {
         item.isChecked = "0";
       });
@@ -391,57 +388,65 @@ export default {
       list[index].isChecked = "1";
     },
 
-    // 3.改变商品的数量
-    changeNum(num) {
+    //3. 数量的改变
+    changeSkuNum(num) {
       this.skuNum += num;
       if (this.skuNum <= 0) {
         this.skuNum = 1;
       }
     },
 
-    async addCart(){
-      const saleAttrList = this.spuSaleAttrList.reduce((p,c)=>{
-        // 创建一个对象来保存销售属性的名称和值
-        const saleAttr = {}
-        // 将名称放入对象中
-        saleAttr.attrName = c.saleAttrName
-        // 查找出销售属性里面isChecked为1的属性
-        const checkedAttrValue = c.spuSaleAttrValueList.find(item=>{
-          return item.isChecked === '1'
-        })
-        // 将isChecked为1的属性的值放入对象里
-        saleAttr.attrValue = checkedAttrValue.saleAttrValueName
-        // 然后将对象放入数组里面
-        p.push(saleAttr)
-        // 返回数组
-        return p
-      },[])
+    //4. 添加购物车
+    async addCart() {
+      const saleAttrList = this.spuSaleAttrList.reduce((p, c) => {
+        //创建一个对象，保存当前某个销售属性的 名称和值
+        const saleAttr = {};
+        //在对象中保存当前销售属性的属性名称
+        saleAttr.attrName = c.saleAttrName;
 
+        //遍历当前属性的属性值列表,把被选中的值交给对象的attrValue保管
+        /* c.spuSaleAttrValueList.forEach((item) => {
+          if (item.isChecked === "1") {
+            saleAttr.attrValue = item.saleAttrValueName;
+          }
+        }); */
+        const checkedAttrValue = c.spuSaleAttrValueList.find((item) => {
+          return item.isChecked === "1";
+        });
+        saleAttr.attrValue = checkedAttrValue.saleAttrValueName;
+
+        p.push(saleAttr);
+
+        return p;
+      }, []);
+
+      console.log(saleAttrList, "saleAttrList");
+
+      //组装要传递给本地临时存储的数据
       const goodData = {
         skuImg: this.skuInfo.skuDefaultImg,
         skuName: this.skuInfo.skuName,
         skuNum: this.skuNum,
         saleAttrList: saleAttrList,
-      }
+      };
 
-      sessionStorage.setItem('goodData',JSON.stringify(goodData))
+      //临时存储
+      sessionStorage.setItem("goodData", JSON.stringify(goodData));
 
-      await reqAddCartOrChangeNum(this.skuId,this.skuNum)
-      alert('加入购物车成功')
-
-      this.$router.push('/addCartSuccess')
-    }
+      await reqAddCartOrChangeNum(this.skuId, this.skuNum);
+      this.$router.push(`/addCartSuccess`);
+    },
   },
   computed: {
-    // 获取地址栏id(params)
+    //拿取动态路由参数
     skuId() {
       return this.$route.params.skuId;
     },
   },
 };
 </script>
-
-<style lang="less" scoped>
+  
+  <style lang="less" scoped>
 .detail {
   .con {
     width: 1200px;
@@ -936,3 +941,4 @@ export default {
   }
 }
 </style>
+  

@@ -4,6 +4,9 @@ module.exports = defineConfig({
   //默认情况下 babel-loader 会忽略所有 node_modules 中的文件。你可以启用本选项，以避免构建后的代码中出现未转译的第三方依赖。
   //不过，对所有的依赖都进行转译可能会降低构建速度
   transpileDependencies: false,
+
+   lintOnSave: false, //关闭掉了脚手架的语法检查
+
   // 服务器配置
   devServer: {
     // 自动打开浏览器

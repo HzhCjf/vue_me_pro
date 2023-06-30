@@ -11,7 +11,8 @@ const request  = axios.create({
 
 // 请求拦截器
 request.interceptors.request.use((config)=>{
-    config.headers.userTempId = store.state.user.userTempId
+    config.headers.userTempId = store.state.user.userTempId;
+    config.headers.token = store.state.user.token
     return config
 })
 
