@@ -23,7 +23,7 @@ request.interceptors.response.use((response)=>{
         // 返回数据
         return response.data.data
     }else{
-        return response.Promise(response.data)
+        return Promise.reject(response.data)
     }
 },(error)=>{
     return Promise.reject(error)

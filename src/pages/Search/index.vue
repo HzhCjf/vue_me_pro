@@ -103,7 +103,7 @@
                           skuId: good.id,
                         },
                       }"
-                      ><img :src="good.defaultImg"
+                      ><img  v-lazy="good.defaultImg"
                     /></router-link>
                   </div>
                   <div class="price">
@@ -173,7 +173,7 @@ export default {
         keyword: "",
         props: [],
         trademark: "",
-        order: "1:asc",
+        order: "1:desc",
         // 当前页
         pageNo: 1,
         // 每页条数
