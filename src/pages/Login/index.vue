@@ -103,7 +103,7 @@ export default {
         } else {
           // 登录之后直接跳转到首页
           this.$router.push("/home");
-          // this.$message.success('登录成功')
+          this.$message.success('登录成功')
         }
       } catch (e) {
         this.$message.error(e)
