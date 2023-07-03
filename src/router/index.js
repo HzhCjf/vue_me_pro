@@ -33,6 +33,9 @@ VueRouter.prototype.replace = function (loaction, onComplate = () => { }, onAbor
 
 const router = new VueRouter({
     mode: 'history',
+    scrollBehavior() {
+        return { x: 0, y: 0 };
+    },
     routes: [
         // 默认首页
         {
@@ -84,62 +87,62 @@ const router = new VueRouter({
         },
         // 加入购物车成功页
         {
-            path:'/addCartSuccess',
-            component:AddCartSuccess,
-            name:'AddCartSuccess'
+            path: '/addCartSuccess',
+            component: AddCartSuccess,
+            name: 'AddCartSuccess'
         },
         // 购物车
         {
-            path:'/shopCart',
-            component:ShopCart,
-            name:'ShopCart'
+            path: '/shopCart',
+            component: ShopCart,
+            name: 'ShopCart'
         },
         // 订单信息
         {
-            path:'/trade',
-            component:Trade,
-            name:'Trade',
-            meta:{
-                isAuth:true
+            path: '/trade',
+            component: Trade,
+            name: 'Trade',
+            meta: {
+                isAuth: true
             }
         },
         // 支付页
         {
-            path:'/pay/:orderId',
-            component:Pay,
-            name:'Pay',
-            meta:{
-                isAuth:true
+            path: '/pay/:orderId',
+            component: Pay,
+            name: 'Pay',
+            meta: {
+                isAuth: true
             }
         },
         // 支付成功
         {
-            path:'/paySuccess',
-            component:PaySuccess,
-            name:'PaySuccess',
-            meta:{
-                isAuth:true
+            path: '/paySuccess',
+            component: PaySuccess,
+            name: 'PaySuccess',
+            meta: {
+                isAuth: true
             }
         },
         // 我的订单
         {
-            path:'/center',
-            component:Center,
-            name:'Center',
-            meta:{
-                isAuth:true
+            path: '/center',
+            component: Center,
+            name: 'Center',
+            meta: {
+                isAuth: true
             },
-            redirect:'/center/myOrder',
-            children:[
+            redirect: '/center/myOrder',
+            children: [
                 {
-                    path:'myOrder',
-                    name:'MyOrder',
-                    component:MyOrder
+                    path: 'myOrder',
+                    name: 'MyOrder',
+                    component: MyOrder
                 },
                 {
-                    path:'teamOrder',
-                    name:'TeamOrder',
-                    component:TeamOrder
+                    path: 'teamOrder',
+                    name: 'TeamOrder',
+                    component: TeamOrder
                 },
             ]
         },
@@ -178,33 +181,33 @@ router.beforeEach(async (to, from, next) => {
     const nickName = store.state.user.userInfo.nickName
     // 全局跳转路由放行之前进度条开始
     NProgress.start()
-    
+
     // 如果有token
-    if(token){
+    if (token) {
         // console.log('1');
-        
+
         // 判断是否去的路由是否为登录
-        if(to.name === 'Login'){
+        if (to.name === 'Login') {
             // 有token就表示已经登录了,不可再去登录页,直接跳转到首页
             next('/home')
             // 如果从首页想跳转到登录页,把进度条直接结束,不结束的话虽然没什么影响,但是进度条会一直在
-            if(from.name === 'Home') NProgress.done()
+            if (from.name === 'Home') NProgress.done()
         }
 
 
         // 如果有token并且有用户信息,代表是正确登录
-        if(nickName){
+        if (nickName) {
             // console.log('2');
             // 直接放行
             next()
-        }else{
+        } else {
             // 如果有token,但是没用用户信息,可能是没获取到,也可能是token错误
-            try{
+            try {
                 // console.log('3');
                 // 用token请求用户信息,能请求到就放行
                 await store.dispatch('user/getUserInfo')
                 next()
-            }catch(e){
+            } catch (e) {
                 // console.log('41');
                 // 如果没请求到,就把vuex里面的token清空,并且删除本地存储的token
                 store.commit('user/clear_Token')
@@ -212,12 +215,12 @@ router.beforeEach(async (to, from, next) => {
                 next(`/login?to=${to.name}`)
             }
         }
-    }else{
+    } else {
         // 如果没有token,那就看此路由在不在白名单之内,如果在就直接跳转到登录页
-        if(to.meta.isAuth){
+        if (to.meta.isAuth) {
             // console.log('5');
             next(`/login?to=${to.name}`)
-        }else{
+        } else {
             // console.log('6');
             // 如果不在就直接放行
             next()

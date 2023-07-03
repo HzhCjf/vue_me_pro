@@ -10,16 +10,30 @@
       </h3>
       <div class="content">
         <label>手机号:</label>
-        <input type="text" placeholder="请输入你的手机号" v-model="userInfo.phone" />
-        <span class="error-msg">错误提示信息</span>
+        <input
+          type="text"
+          placeholder="请输入你的手机号"
+          v-model="userInfo.phone"
+          name="phone"
+          v-validate="{ required: true, regex: /^1[0-9]{10}$/}"
+          :class="{ errors: errors.has('phone') }"
+        />
+        <span class="error-msg">{{ errors.first("phone") }}</span>
       </div>
       <div class="content">
         <label>验证码:</label>
-        <input type="text" placeholder="请输入验证码" v-model="userInfo.code" />
+        <input
+          type="text"
+          placeholder="请输入验证码"
+          v-model="userInfo.code"
+          name="code"
+          v-validate="{ required: true, regex: /^[0-9]{6}$/ }"
+          :class="{ errors: errors.has('code') }"
+        />
         <button @click="getCode" :disabled="isDisabled">
           获取验证码 <span v-show="isDisabled">{{ time }}s</span>
         </button>
-        <span class="error-msg">错误提示信息</span>
+        <span class="error-msg">{{ errors.first("code") }}</span>
       </div>
       <div class="content">
         <label>登录密码:</label>
@@ -27,8 +41,11 @@
           type="text"
           placeholder="请输入你的登录密码"
           v-model="userInfo.password"
+          name="password"
+          v-validate="{ required: true, regex: /^[a-zA-Z0-9]{3,6}$/ }"
+          :class="{ error: errors.has('password') }"
         />
-        <span class="error-msg">错误提示信息</span>
+        <span class="error-msg">{{ errors.first("password") }}</span>
       </div>
       <div class="content">
         <label>确认密码:</label>
@@ -36,13 +53,16 @@
           type="text"
           placeholder="请输入确认密码"
           v-model="userInfo.passwordAgain"
+          name="passwordAgain"
+          v-validate="{ required: true, is:userInfo.password }"
+          :class="{ errors: errors.has('passwordAgain') }"
         />
-        <span class="error-msg">错误提示信息</span>
+        <span class="error-msg">{{ errors.first("passwordAgain") }}</span>
       </div>
       <div class="controls">
-        <input name="m1" type="checkbox" v-model="userInfo.isAgree" />
+        <input name="agree" type="checkbox" v-model="userInfo.isAgree" v-validate="{ agree:'' }" />
         <span>同意协议并注册《尚品汇用户协议》</span>
-        <span class="error-msg">错误提示信息</span>
+        <span class="error-msg">{{ errors.first("agree") }}</span>
       </div>
       <div class="btn">
         <button @click="register">完成注册</button>
@@ -88,7 +108,8 @@ export default {
   methods: {
     // 获取验证码
     async getCode() {
-      if (!(this.userInfo.phone.length === 11)) return this.$message.error("手机号格式错误");
+      if (!(this.userInfo.phone.length === 11))
+        return this.$message.error("手机号格式错误");
       // 禁用获取验证码按钮
       this.isDisabled = true;
       // 验证码倒计时和禁用按钮倒计时
@@ -108,20 +129,18 @@ export default {
 
     // 注册完成
     async register() {
-      const { phone, password, passwordAgain, isAgree, code } = this.userInfo;
-      // 必须每一个输入框都填写
-      if (!(phone && password && password === passwordAgain && isAgree && code))
-        return this.$message.error("必须全部进行填写!!!");
-
+      // 整体校验
+      const result = await this.$validator.validateAll();
+      if(!result) return
       try {
         // 请求注册
         await reqRegister(this.userInfo);
         // 跳转至登录页
         this.$router.push("/login");
-        this.$message.success('注册成功')
+        this.$message.success("注册成功");
       } catch (e) {
         // 错误信息
-        this.$message.error('注册失败'+e.message)
+        this.$message.error("注册失败" + e.message);
       }
     },
   },
@@ -129,6 +148,9 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.errors{
+  border: 1px solid red !important;
+}
 .register-container {
   .register {
     width: 1200px;
