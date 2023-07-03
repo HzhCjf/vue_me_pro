@@ -81,12 +81,26 @@ const router = new VueRouter({
             path: "/detail/:skuId",
             component: Detail,
             name: "Detail",
+            beforeEnter(to,from,next){
+                if(from.name === 'Search'){
+                    next()
+                }else{
+                    next('/Search')
+                }
+            },
         },
         // 加入购物车成功页
         {
             path:'/addCartSuccess',
             component:AddCartSuccess,
-            name:'AddCartSuccess'
+            name:'AddCartSuccess',
+            beforeEnter(to,from,next){
+                if(from.name === 'Detail'){
+                    next()
+                }else{
+                    next('/Search')
+                }
+            },
         },
         // 购物车
         {
@@ -101,7 +115,14 @@ const router = new VueRouter({
             name:'Trade',
             meta:{
                 isAuth:true
-            }
+            },
+            beforeEnter(to,from,next){
+                if(from.name === 'ShopCart'){
+                    next()
+                }else{
+                    next('/ShopCart')
+                }
+            },
         },
         // 支付页
         {
@@ -110,7 +131,14 @@ const router = new VueRouter({
             name:'Pay',
             meta:{
                 isAuth:true
-            }
+            },
+            beforeEnter(to,from,next){
+                if(from.name === 'Trade'){
+                    next()
+                }else{
+                    next('/ShopCart')
+                }
+            },
         },
         // 支付成功
         {
@@ -119,7 +147,14 @@ const router = new VueRouter({
             name:'PaySuccess',
             meta:{
                 isAuth:true
-            }
+            },
+            beforeEnter(to,from,next){
+                if(from.name === 'Pay'){
+                    next()
+                }else{
+                    next('/ShopCart')
+                }
+            },
         },
         // 我的订单
         {
@@ -134,12 +169,18 @@ const router = new VueRouter({
                 {
                     path:'myOrder',
                     name:'MyOrder',
-                    component:MyOrder
+                    component:MyOrder,
+                    meta:{
+                        isAuth:true
+                    },
                 },
                 {
                     path:'teamOrder',
                     name:'TeamOrder',
-                    component:TeamOrder
+                    component:TeamOrder,
+                    meta:{
+                        isAuth:true
+                    },
                 },
             ]
         },
@@ -151,7 +192,10 @@ const router = new VueRouter({
                 FooterIsHidden: true
             }
         },
-    ]
+    ],
+    scrollBehavior(){
+        return {x:0,y:0}
+    }
 })
 
 

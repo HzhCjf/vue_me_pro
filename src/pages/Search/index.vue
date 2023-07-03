@@ -47,6 +47,7 @@
                   :class="{ active: searchParams.order.split(':')[0] === '1' }"
                   @click="order('1')"
                 >
+                  <!-- 1.当order的值为asc的时候就用icon-manyue类名,否则用半月类名 2.当order的值为1的时候就显示,不为1就隐藏 -->
                   <a
                     >综合
                     <span
@@ -64,6 +65,7 @@
                   :class="{ active: searchParams.order.split(':')[0] === '2' }"
                   @click="order('2')"
                 >
+                  <!-- 1.当order的值为asc的时候就用icon-manyue类名,否则用半月类名 2.当order的值为1的时候就显示,不为1就隐藏 -->
                   <a
                     >价格
                     <span
@@ -85,7 +87,7 @@
               <li class="yui3-u-1-5" v-for="good in goodsList" :key="good.id">
                 <div class="list-wrap">
                   <div class="p-img">
-                    <router-link
+                    <!-- <router-link
                       :to="{
                         name: 'Detail',
                         params: {
@@ -93,6 +95,15 @@
                         },
                       }"
                       ><img :src="good.defaultImg"
+                    /></router-link> -->
+                    <router-link
+                      :to="{
+                        name: 'Detail',
+                        params: {
+                          skuId: good.id,
+                        },
+                      }"
+                      ><img  v-lazy="good.defaultImg"
                     /></router-link>
                   </div>
                   <div class="price">
@@ -129,6 +140,12 @@
               :totalPages="totalPages"
               :continuePage="5"
             />
+            <!-- <Pagination
+              :pageNo.sync="searchParams.pageNo"
+              :total="total"
+              :totalPages="totalPages"
+              :continuePage="5"
+            /> -->
           </div>
         </div>
       </div>
@@ -156,15 +173,21 @@ export default {
         keyword: "",
         props: [],
         trademark: "",
-        order: "1:asc",
+        order: "1:desc",
+        // 当前页
         pageNo: 1,
+        // 每页条数
         pageSize: 10,
       },
+      // 平台属性
       attrsList: [],
+      // 商品内容
       goodsList: [],
+      // 品牌
       trademarkList: [],
       total: 0,
       totalPages: 0,
+      // 总条数
     };
   },
 
@@ -236,10 +259,24 @@ export default {
           lastOrder === "desc" ? "asc" : "desc"
         }`;
       } else {
-        this.searchParams.order = `${nowType}:desc`;
-      }
-    },
-  },
+        this.searchParams.order = `${nowType}:desc`
+        // 按钮排序,传入需要是什么按钮
+        // order(nowType) {
+        //   // 解构之前的按钮名字和排序
+        //   const [lastType, lastOrder] = this.searchParams.order.split(":");
+        //   // 当按钮还是同一个的时候,就只是将排序取反即可
+        //   if (nowType === lastType) {
+        //     this.searchParams.order = `${nowType}:${
+        //       lastOrder === "desc" ? "asc" : "desc"
+        //     }`;
+        //     // 当不是同一个按钮的时候,就取现在的按钮,默认为降序
+        //   } else {
+        //     this.searchParams.order = `${nowType}:'desc'`;
+        //   };
+        // };
+    }
+  }
+},
 
   watch: {
     $route: {
@@ -277,7 +314,8 @@ export default {
       },
     },
   },
-};
+
+}
 </script>
 
 <style lang="less" scoped>
